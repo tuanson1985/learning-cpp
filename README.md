@@ -246,3 +246,135 @@ int main()
     return 0;
 }
 
+Ép kiểu dữ liệu (Type Casting)
+
+Trong C++, ép kiểu dữ liệu là việc chuyển đổi giá trị từ kiểu dữ liệu này sang kiểu dữ liệu khác. Có hai cách ép kiểu:
+
+1. Ép kiểu ngầm định (Implicit casting / Type conversion)
+
+Trình biên dịch tự động chuyển đổi kiểu dữ liệu nếu cần thiết.
+
+Thường xảy ra khi ta gán giá trị từ kiểu nhỏ sang kiểu lớn, hoặc trong các biểu thức hỗn hợp.
+
+Ví dụ:
+
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int a = 5;
+    double b = 2.5;
+
+    double c = a + b; // a (int) tự động ép thành double
+    cout << c; // 7.5
+
+    return 0;
+}
+
+
+Ở đây a được ép ngầm định thành double trước khi cộng.
+
+2. Ép kiểu tường minh (Explicit casting)
+
+Người lập trình chỉ định rõ kiểu muốn chuyển đổi.
+
+Có nhiều cách thực hiện:
+
+Cách 1: Ép kiểu bằng cú pháp C
+int a = 10;
+double b = (double)a / 3; // ép a thành double
+
+Cách 2: Sử dụng toán tử static_cast
+int a = 10;
+double b = static_cast<double>(a) / 3;
+
+Cách 3: Các kiểu cast khác (ít dùng khi mới học)
+
+dynamic_cast
+
+const_cast
+
+reinterpret_cast
+
+⚠️ Chủ yếu khi học cơ bản, ta thường dùng cú pháp (type) hoặc static_cast.
+
+Ví dụ minh họa
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int a = 5, b = 2;
+
+    cout << "a / b = " << a / b << endl; // Kết quả: 2 (chia nguyên)
+    cout << "a / (double)b = " << a / (double)b << endl; // Kết quả: 2.5
+
+    return 0;
+}
+
+Bảng mã ASCII
+
+ASCII (American Standard Code for Information Interchange) là bảng mã ký tự chuẩn, dùng để biểu diễn các ký tự trong máy tính bằng số nguyên.
+
+Mỗi ký tự (chữ cái, chữ số, ký hiệu, …) sẽ được biểu diễn bằng một số nguyên trong khoảng từ 0 → 127.
+
+Trong C++, kiểu dữ liệu char lưu trữ ký tự nhưng thực chất là lưu giá trị số nguyên ASCII tương ứng.
+
+Ví dụ sử dụng ASCII
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    char c = 'A';
+    cout << "Ký tự: " << c << endl;
+    cout << "Mã ASCII: " << (int)c << endl;
+
+    int code = 98;
+    cout << "Mã 98 trong ASCII là ký tự: " << (char)code << endl;
+
+    return 0;
+}
+
+Kết quả:
+Ký tự: A
+Mã ASCII: 65
+Mã 98 trong ASCII là ký tự: b
+
+Một số giá trị ASCII thông dụng
+Ký tự	Giá trị ASCII
+'0'	48
+'1'	49
+'9'	57
+'A'	65
+'Z'	90
+'a'	97
+'z'	122
+' ' (space)	32
+'\n' (newline)	10
+Ứng dụng thực tế
+
+Kiểm tra chữ hoa, chữ thường bằng giá trị ASCII.
+
+Chuyển đổi ký tự sang số ('0' → 0, '5' → 5).
+
+Làm việc với mã hóa, xử lý chuỗi ký tự.
+
+Ví dụ: kiểm tra ký tự có phải chữ thường không:
+
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    char c;
+    cin >> c;
+
+    if (c >= 'a' && c <= 'z')
+        cout << "Day la chu thuong";
+    else
+        cout << "Khong phai chu thuong";
+
+    return 0;
+}
