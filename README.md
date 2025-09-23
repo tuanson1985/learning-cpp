@@ -1,4 +1,4 @@
-## Biến (variable) là gì?
+﻿## Biến (variable) là gì?
 - Biến là thứ được dùng để lưu trữ dữ liệu của chương trình và nó mang ý nghĩa có thể thay đổi được.
 - Cách sử dụng biến:
     - Trước khi sử dụng phải khai báo biến
@@ -171,43 +171,49 @@
     }
     ```
 
-Biến cục bộ và biến toàn cục
-Phạm vi cục bộ
-Trong 1 chương trình sẽ có các phạm vi (scope), mỗi 1 phạm vi sẽ được thể hiện bằng dấu {}.
+# Biến cục bộ và biến toàn cục
 
-Biến khai báo ở phạm vi nào thì chỉ được sử dụng ở trong phạm vi đó (đó được gọi là các biến cục bộ).
+## 1. Phạm vi cục bộ (Local Scope)
+Trong một chương trình C++, phạm vi (scope) được xác định bằng cặp dấu ngoặc nhọn `{ }`.  
+Biến khai báo trong một phạm vi chỉ tồn tại và sử dụng được bên trong phạm vi đó.  
+Những biến này được gọi là **biến cục bộ**.
 
-Ví dụ:
-
-#include <iostream> 
+### Ví dụ:
+```c
+#include <iostream>
+using namespace std;
 
 int main()
 {
     int main_var = 0;
-    std::cout << main_var << std::endl;
+    cout << main_var << endl;
 
     { // Phạm vi 1
         int scope_var_1 = 1;
-        std::cout << scope_var_1 << std::endl;
+        cout << scope_var_1 << endl;
 
         {
-            std::cout << scope_var_1 << std::endl;
+            cout << scope_var_1 << endl; // hợp lệ vì scope_var_1 nằm trong phạm vi cha
         }
     }
 
     { // Phạm vi 2
         int scope_var_2 = 2;
-        std::cout << scope_var_2 << std::endl;
-        std::cout << scope_var_1 << std::endl; // Lỗi: scope_var_1 was not declared in this scope
+        cout << scope_var_2 << endl;
+        cout << scope_var_1 << endl; // ❌ Lỗi: scope_var_1 không tồn tại ở đây
     }
 
     return 0;
 }
-Khi có 1 biến ở phạm vi bên trong trùng tên với 1 biến ở phạm vi bên ngoài, chương trình sẽ ưu tiên lấy giá trị của biến ở phạm vi gần nhất tính từ trong ra ngoài.
+```
 
-Ví dụ:
+### Ghi chú:
+- Khi một biến trong phạm vi bên trong trùng tên với biến bên ngoài, chương trình **ưu tiên sử dụng biến gần nhất** (shadowing).
 
+### Ví dụ shadowing:
+```c
 #include <iostream>
+using namespace std;
 
 int main()
 {
@@ -215,49 +221,56 @@ int main()
 
     {
         int main_var = 1;
-        std::cout << main_var; // 1
+        cout << main_var; // 1
     }
 
-    std::cout << main_var; // 0
-
+    cout << main_var; // 0
     return 0;
 }
-Phạm vi toàn cục
-Các biến được khai báo ở bên ngoài chương trình được gọi là biến toàn cục có thể được sử dụng ở bất cứ nơi nào trong chương trình.
+```
 
-Ví dụ:
+---
 
+## 2. Phạm vi toàn cục (Global Scope)
+Biến khai báo ngoài tất cả các hàm sẽ có **phạm vi toàn cục**.  
+Biến toàn cục có thể được truy cập từ bất kỳ nơi nào trong chương trình.
+
+### Ví dụ:
+```c
 #include <iostream>
+using namespace std;
 
-int global_var = 1;
+int global_var = 1; // biến toàn cục
 
 int main()
 {
-    std::cout << "Main scope: " << global_var << std::endl;
+    cout << "Main scope: " << global_var << endl;
 
     { // Phạm vi 1
-        std::cout << "Scope 1: " << global_var << std::endl;
+        cout << "Scope 1: " << global_var << endl;
     }
 
     { // Phạm vi 2
-        std::cout << "Scope 2: " << global_var << std::endl;
+        cout << "Scope 2: " << global_var << endl;
     }
 
     return 0;
 }
+```
 
-Ép kiểu dữ liệu (Type Casting)
+---
 
-Trong C++, ép kiểu dữ liệu là việc chuyển đổi giá trị từ kiểu dữ liệu này sang kiểu dữ liệu khác. Có hai cách ép kiểu:
+# Ép kiểu dữ liệu (Type Casting)
 
-1. Ép kiểu ngầm định (Implicit casting / Type conversion)
+Trong C++, ép kiểu dữ liệu là việc chuyển đổi giá trị từ kiểu dữ liệu này sang kiểu dữ liệu khác.  
+Có hai loại ép kiểu:
 
-Trình biên dịch tự động chuyển đổi kiểu dữ liệu nếu cần thiết.
+## 1. Ép kiểu ngầm định (Implicit Casting / Type Conversion)
+- Trình biên dịch tự động thực hiện khi cần thiết.  
+- Thường xảy ra khi gán giá trị từ kiểu nhỏ sang kiểu lớn hoặc trong biểu thức hỗn hợp.
 
-Thường xảy ra khi ta gán giá trị từ kiểu nhỏ sang kiểu lớn, hoặc trong các biểu thức hỗn hợp.
-
-Ví dụ:
-
+### Ví dụ:
+```c
 #include <iostream>
 using namespace std;
 
@@ -266,40 +279,39 @@ int main()
     int a = 5;
     double b = 2.5;
 
-    double c = a + b; // a (int) tự động ép thành double
+    double c = a + b; // a (int) được ép thành double
     cout << c; // 7.5
 
     return 0;
 }
+```
 
+---
 
-Ở đây a được ép ngầm định thành double trước khi cộng.
+## 2. Ép kiểu tường minh (Explicit Casting)
+- Người lập trình chỉ định rõ kiểu muốn chuyển đổi.
 
-2. Ép kiểu tường minh (Explicit casting)
-
-Người lập trình chỉ định rõ kiểu muốn chuyển đổi.
-
-Có nhiều cách thực hiện:
-
-Cách 1: Ép kiểu bằng cú pháp C
+### Cách 1: Dùng cú pháp C
+```c
 int a = 10;
 double b = (double)a / 3; // ép a thành double
+```
 
-Cách 2: Sử dụng toán tử static_cast
+### Cách 2: Dùng toán tử `static_cast`
+```c
 int a = 10;
 double b = static_cast<double>(a) / 3;
+```
 
-Cách 3: Các kiểu cast khác (ít dùng khi mới học)
+### Cách 3: Các kiểu cast khác (ít dùng khi mới học)
+- `dynamic_cast`
+- `const_cast`
+- `reinterpret_cast`
 
-dynamic_cast
+⚠️ Khi học cơ bản, thường dùng `(type)` hoặc `static_cast`.
 
-const_cast
-
-reinterpret_cast
-
-⚠️ Chủ yếu khi học cơ bản, ta thường dùng cú pháp (type) hoặc static_cast.
-
-Ví dụ minh họa
+### Ví dụ minh họa:
+```c
 #include <iostream>
 using namespace std;
 
@@ -307,21 +319,24 @@ int main()
 {
     int a = 5, b = 2;
 
-    cout << "a / b = " << a / b << endl; // Kết quả: 2 (chia nguyên)
-    cout << "a / (double)b = " << a / (double)b << endl; // Kết quả: 2.5
+    cout << "a / b = " << a / b << endl;           // 2 (chia nguyên)
+    cout << "a / (double)b = " << a / (double)b << endl; // 2.5
 
     return 0;
 }
+```
 
-Bảng mã ASCII
+---
 
-ASCII (American Standard Code for Information Interchange) là bảng mã ký tự chuẩn, dùng để biểu diễn các ký tự trong máy tính bằng số nguyên.
+# Bảng mã ASCII
 
-Mỗi ký tự (chữ cái, chữ số, ký hiệu, …) sẽ được biểu diễn bằng một số nguyên trong khoảng từ 0 → 127.
+ASCII (American Standard Code for Information Interchange) là bảng mã ký tự chuẩn, dùng để biểu diễn ký tự trong máy tính bằng số nguyên.  
+Mỗi ký tự (chữ cái, chữ số, ký hiệu, …) sẽ được biểu diễn bằng một số nguyên từ `0 → 127`.
 
-Trong C++, kiểu dữ liệu char lưu trữ ký tự nhưng thực chất là lưu giá trị số nguyên ASCII tương ứng.
+Trong C++, kiểu `char` lưu trữ ký tự nhưng thực chất là lưu giá trị số nguyên ASCII tương ứng.
 
-Ví dụ sử dụng ASCII
+### Ví dụ sử dụng ASCII:
+```c
 #include <iostream>
 using namespace std;
 
@@ -336,33 +351,35 @@ int main()
 
     return 0;
 }
+```
 
-Kết quả:
+### Kết quả:
+```
 Ký tự: A
 Mã ASCII: 65
 Mã 98 trong ASCII là ký tự: b
+```
 
-Một số giá trị ASCII thông dụng
-Ký tự	Giá trị ASCII
-'0'	48
-'1'	49
-'9'	57
-'A'	65
-'Z'	90
-'a'	97
-'z'	122
-' ' (space)	32
-'\n' (newline)	10
-Ứng dụng thực tế
+### Một số giá trị ASCII thông dụng:
+| Ký tự | Giá trị ASCII |
+|-------|---------------|
+| '0'   | 48            |
+| '1'   | 49            |
+| '9'   | 57            |
+| 'A'   | 65            |
+| 'Z'   | 90            |
+| 'a'   | 97            |
+| 'z'   | 122           |
+| ' ' (space) | 32      |
+| '\n' (newline) | 10  |
 
-Kiểm tra chữ hoa, chữ thường bằng giá trị ASCII.
+### Ứng dụng thực tế:
+- Kiểm tra chữ hoa, chữ thường bằng giá trị ASCII.  
+- Chuyển đổi ký tự sang số (`'0' → 0`, `'5' → 5`).  
+- Làm việc với mã hóa, xử lý chuỗi ký tự.
 
-Chuyển đổi ký tự sang số ('0' → 0, '5' → 5).
-
-Làm việc với mã hóa, xử lý chuỗi ký tự.
-
-Ví dụ: kiểm tra ký tự có phải chữ thường không:
-
+### Ví dụ: kiểm tra ký tự có phải chữ thường không
+```c
 #include <iostream>
 using namespace std;
 
@@ -378,3 +395,200 @@ int main()
 
     return 0;
 }
+```
+
+
+# Cấu trúc điều khiển và vòng lặp trong C++
+
+## 1. Cấu trúc if – else
+- **Ý nghĩa**: Cho phép chương trình ra quyết định dựa trên điều kiện (true/false).
+- **Cú pháp**:
+```c
+if (điều_kiện) {
+    // Khối lệnh khi điều kiện đúng
+} else {
+    // Khối lệnh khi điều kiện sai
+}
+```
+
+### Lưu đồ (Flowchart)
+
+```
+     +------------------+
+     |  Kiểm tra điều   |
+     |      kiện        |
+     +--------+---------+
+              |
+       +------v------+
+   YES | Thực hiện   | 
+       | khối lệnh 1 |
+       +-------------+
+              |
+             NO
+              |
+       +------v------+
+       | Thực hiện   |
+       | khối lệnh 2 |
+       +-------------+
+```
+
+### Ví dụ:
+```c
+int x;
+cin >> x;
+
+if (x % 2 == 0) {
+    cout << "x la so chan";
+} else {
+    cout << "x la so le";
+}
+```
+👉 Ứng dụng: Kiểm tra điều kiện, phân loại dữ liệu.
+
+---
+
+## 2. Cấu trúc switch – case
+- **Ý nghĩa**: Thay thế cho nhiều `if else if` liên tiếp khi cần so sánh 1 biến với nhiều giá trị rời rạc.
+- **Cú pháp**:
+```c
+switch (biểu_thức) {
+    case giá_trị_1:
+        // Khối lệnh 1
+        break;
+    case giá_trị_2:
+        // Khối lệnh 2
+        break;
+    default:
+        // Khối lệnh mặc định
+}
+```
+
+⚠️ Lưu ý:
+- `break` giúp thoát khỏi `switch`. Nếu quên, chương trình sẽ “chạy rơi xuống” case tiếp theo.
+- Chỉ hoạt động với **kiểu số nguyên** hoặc **char**, không dùng cho `float/double`.
+
+### Ví dụ:
+```c
+int day = 3;
+switch (day) {
+    case 1: cout << "Monday"; break;
+    case 2: cout << "Tuesday"; break;
+    case 3: cout << "Wednesday"; break;
+    default: cout << "Invalid day";
+}
+```
+
+---
+
+## 3. Toán tử ba ngôi (?:)
+- **Ý nghĩa**: Viết gọn `if else`.
+- **Cú pháp**:
+```c
+biến = (điều_kiện) ? giá_trị_nếu_true : giá_trị_nếu_false;
+```
+
+### Ví dụ:
+```c
+int a = 10, b = 20;
+int max = (a > b) ? a : b;
+cout << "Max = " << max;
+```
+
+---
+
+## 4. Vòng lặp
+
+### Bảng so sánh các vòng lặp
+
+| Vòng lặp | Điểm đặc trưng | Khi dùng |
+|----------|----------------|----------|
+| for      | Biết trước số lần lặp | Duyệt mảng, in dãy số |
+| while    | Chưa biết trước số lần lặp, dừng khi điều kiện sai | Lặp đến khi nhập dữ liệu hợp lệ |
+| do while | Luôn chạy ít nhất 1 lần | Menu chương trình, nhập dữ liệu và kiểm tra lại |
+
+### Ví dụ:
+```c
+for (int i = 1; i <= 5; i++) {
+    cout << i << " ";
+}
+```
+Kết quả: `1 2 3 4 5`
+
+```c
+int i = 1;
+while (i <= 5) {
+    cout << i << " ";
+    i++;
+}
+```
+Kết quả: `1 2 3 4 5`
+
+```c
+int i = 1;
+do {
+    cout << i << " ";
+    i++;
+} while (i <= 5);
+```
+Kết quả: `1 2 3 4 5`
+
+---
+
+## 5. Kết hợp vòng lặp và if
+Ví dụ: In ra số lẻ từ 1 đến 10
+```c
+for (int i = 1; i <= 10; i++) {
+    if (i % 2 != 0) cout << i << " ";
+}
+```
+Kết quả: `1 3 5 7 9`
+
+---
+
+## 6. break, continue, goto
+
+### break
+- Thoát khỏi vòng lặp ngay lập tức.
+```c
+for (int i = 1; i <= 5; i++) {
+    if (i == 3) break;
+    cout << i << " ";
+}
+// Kết quả: 1 2
+```
+
+### continue
+- Bỏ qua lần lặp hiện tại, tiếp tục vòng lặp tiếp theo.
+```c
+for (int i = 1; i <= 5; i++) {
+    if (i == 3) continue;
+    cout << i << " ";
+}
+// Kết quả: 1 2 4 5
+```
+
+### goto
+- Nhảy đến một nhãn (label) được định nghĩa trong code.
+- ⚠️ Hạn chế dùng vì dễ gây rối luồng chương trình.
+
+```c
+int x = 1;
+label:
+cout << x << " ";
+x++;
+if (x <= 3) goto label;
+// Kết quả: 1 2 3
+```
+
+---
+
+## 7. Bài tập thực hành
+1. Viết chương trình nhập một số nguyên n, kiểm tra n chẵn hay lẻ bằng **if else**.  
+2. Viết chương trình nhập điểm số (0–10), in ra kết quả học lực bằng **switch case** (giỏi, khá, trung bình, yếu).  
+3. In ra bảng cửu chương 2–9 bằng **for**.  
+4. Viết chương trình nhập mật khẩu, yêu cầu nhập lại cho đến khi đúng (dùng **while**).  
+5. Viết chương trình menu:  
+   - 1. Cộng hai số  
+   - 2. Trừ hai số  
+   - 3. Thoát  
+   (dùng **do while**).  
