@@ -581,14 +581,146 @@ if (x <= 3) goto label;
 ```
 
 ---
+# Mảng (Array) trong C++
 
-## 7. Bài tập thực hành
-1. Viết chương trình nhập một số nguyên n, kiểm tra n chẵn hay lẻ bằng **if else**.  
-2. Viết chương trình nhập điểm số (0–10), in ra kết quả học lực bằng **switch case** (giỏi, khá, trung bình, yếu).  
-3. In ra bảng cửu chương 2–9 bằng **for**.  
-4. Viết chương trình nhập mật khẩu, yêu cầu nhập lại cho đến khi đúng (dùng **while**).  
-5. Viết chương trình menu:  
-   - 1. Cộng hai số  
-   - 2. Trừ hai số  
-   - 3. Thoát  
-   (dùng **do while**).  
+**Mảng** là tập hợp các phần tử **cùng kiểu dữ liệu**, được lưu liên
+tiếp trong bộ nhớ và truy cập bằng **chỉ số (index)** bắt đầu từ `0`.
+
+------------------------------------------------------------------------
+
+## 1) Mảng 1 chiều (One-Dimensional Array)
+
+### Khai báo & khởi tạo
+
+-   Cú pháp khai báo:\
+    `kiểu_dữ_liệu tên_mảng[kích_thước];`
+
+-   Khởi tạo khi khai báo:
+
+    ``` c
+    int a[5];                    // 5 phần tử chưa gán giá trị
+    int b[5] = {1, 2, 3, 4, 5};  // khởi tạo đầy đủ
+    int c[]  = {7, 8, 9};        // suy ra kích thước = 3
+    ```
+
+> ⚠️ Không có thuộc tính lưu sẵn số phần tử. Bạn **tự giữ biến `n`** để
+> biết mảng đang dùng bao nhiêu phần tử.
+
+### Nhập / xuất mảng 1 chiều
+
+``` c
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int n;
+    cin >> n;
+    int a[100];
+
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+    }
+
+    for (int i = 0; i < n; i++) {
+        cout << a[i] << " ";
+    }
+
+    return 0;
+}
+```
+
+### Tính tổng các phần tử trong mảng
+
+``` c
+int sum = 0;
+for (int i = 0; i < n; i++) {
+    sum += a[i];
+}
+cout << "Tong = " << sum;
+```
+
+### Tìm phần tử lớn nhất
+
+``` c
+int maxVal = a[0];
+for (int i = 1; i < n; i++) {
+    if (a[i] > maxVal) maxVal = a[i];
+}
+cout << "Gia tri lon nhat: " << maxVal;
+```
+
+------------------------------------------------------------------------
+
+## 2) Mảng 2 chiều (Two-Dimensional Array)
+
+Mảng 2 chiều thường được hình dung như **ma trận** (n dòng × m cột).
+
+### Khai báo & khởi tạo
+
+``` c
+int a[3][4];    // mảng 3 hàng, 4 cột
+int b[2][2] = { {1, 2}, {3, 4} };
+```
+
+### Nhập / xuất mảng 2 chiều
+
+``` c
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int n, m;
+    cin >> n >> m;
+    int a[10][10];
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            cin >> a[i][j];
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            cout << a[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+    return 0;
+}
+```
+
+### Tính tổng các phần tử
+
+``` c
+int sum = 0;
+for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+        sum += a[i][j];
+    }
+}
+cout << "Tong = " << sum;
+```
+
+### Tìm phần tử lớn nhất mỗi hàng
+
+``` c
+for (int i = 0; i < n; i++) {
+    int maxRow = a[i][0];
+    for (int j = 1; j < m; j++) {
+        if (a[i][j] > maxRow) maxRow = a[i][j];
+    }
+    cout << "Max hang " << i << " = " << maxRow << endl;
+}
+```
+
+------------------------------------------------------------------------
+
+## 3) Ghi nhớ quan trọng
+
+-   Mảng **cố định kích thước** khi khai báo. Nếu cần thay đổi linh hoạt
+    → dùng `vector`.
+-   Truy cập phần tử ngoài giới hạn sẽ gây **lỗi truy cập bộ nhớ**.
+-   Chỉ số mảng bắt đầu từ `0`.
