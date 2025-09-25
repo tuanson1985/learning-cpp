@@ -724,3 +724,73 @@ for (int i = 0; i < n; i++) {
     → dùng `vector`.
 -   Truy cập phần tử ngoài giới hạn sẽ gây **lỗi truy cập bộ nhớ**.
 -   Chỉ số mảng bắt đầu từ `0`.
+
+# Thuật toán Sắp xếp Nổi bọt (Bubble Sort)
+
+## Giới thiệu
+**Bubble Sort** là một thuật toán sắp xếp đơn giản, hoạt động bằng cách **so sánh từng cặp phần tử kề nhau** và **hoán đổi vị trí nếu chúng không đúng thứ tự**.  
+Quá trình này được lặp lại cho đến khi mảng được sắp xếp xong.
+
+Tên gọi "nổi bọt" (bubble) xuất phát từ việc các phần tử lớn dần "nổi" lên cuối mảng sau mỗi vòng lặp.
+
+---
+
+## Độ phức tạp
+- **Thời gian:**
+  - Trường hợp tốt nhất (*Best case*): `O(n)` (nếu mảng đã sắp xếp, có thể dừng sớm).
+  - Trường hợp trung bình (*Average case*): `O(n^2)`.
+  - Trường hợp xấu nhất (*Worst case*): `O(n^2)`.
+- **Không gian:** `O(1)` (thuật toán sắp xếp tại chỗ, không dùng thêm bộ nhớ).
+
+---
+
+## Ý tưởng thuật toán
+1. Bắt đầu từ phần tử đầu tiên, so sánh nó với phần tử ngay sau.
+2. Nếu phần tử hiện tại lớn hơn phần tử sau → hoán đổi.
+3. Tiếp tục như vậy đến cuối mảng → phần tử lớn nhất "nổi" lên cuối.
+4. Lặp lại quá trình, nhưng không cần xét các phần tử đã "nổi" lên đúng vị trí.
+5. Dừng khi không còn hoán đổi nào.
+
+---
+
+## Minh họa
+Ví dụ: Sắp xếp dãy `[5, 3, 4, 1, 2]` tăng dần:
+
+- Lần 1: `[3, 4, 1, 2, 5]`
+- Lần 2: `[3, 1, 2, 4, 5]`
+- Lần 3: `[1, 2, 3, 4, 5]` ✅
+
+---
+
+## Code minh họa
+
+### C++
+```cpp
+#include <iostream>
+using namespace std;
+
+void bubbleSort(int arr[], int n) {
+    bool swapped;
+    for (int i = 0; i < n - 1; i++) {
+        swapped = false;
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+                swapped = true;
+            }
+        }
+        // Nếu không có hoán đổi nào, mảng đã sắp xếp
+        if (!swapped) break;
+    }
+}
+
+int main() {
+    int arr[] = {5, 3, 4, 1, 2};
+    int n = sizeof(arr) / sizeof(arr[0]);
+
+    bubbleSort(arr, n);
+
+    cout << "Mang sau khi sap xep: ";
+    for (int i = 0; i < n; i++) cout << arr[i] << " ";
+    return 0;
+}
