@@ -794,3 +794,110 @@ int main() {
     for (int i = 0; i < n; i++) cout << arr[i] << " ";
     return 0;
 }
+
+# String trong C++
+
+## 1. Giới thiệu
+
+-   **String** là kiểu dữ liệu dùng để lưu trữ chuỗi ký tự (văn bản).
+-   Trong C++, chuỗi có thể khai báo bằng:
+    -   Mảng ký tự (`char[]`)
+    -   Hoặc dùng lớp `std::string` trong thư viện `<string>` (cách
+        thường dùng).
+
+Ví dụ:
+
+``` cpp
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    string name = "Hello World";
+    cout << name;
+    return 0;
+}
+```
+
+------------------------------------------------------------------------
+
+## 2. Một số phương thức làm việc với String
+
+### 2.1. Lấy độ dài chuỗi
+
+``` cpp
+string s = "Hello";
+cout << s.length();  // Kết quả: 5
+```
+
+### 2.2. Truy cập ký tự trong chuỗi
+
+``` cpp
+string s = "Hello";
+cout << s[0];  // H
+cout << s.at(1); // e
+```
+
+### 2.3. Nối chuỗi
+
+``` cpp
+string a = "Hello ";
+string b = "World";
+string c = a + b;      // "Hello World"
+a.append(b);           // "Hello World"
+```
+
+### 2.4. So sánh chuỗi
+
+``` cpp
+string a = "abc";
+string b = "xyz";
+
+if (a == b) cout << "Bằng nhau";
+if (a.compare(b) < 0) cout << "a nhỏ hơn b";
+```
+
+### 2.5. Tìm kiếm trong chuỗi
+
+``` cpp
+string s = "Xin chao cac ban";
+int pos = s.find("chao");   // Vị trí: 4
+```
+
+### 2.6. Thay thế chuỗi
+
+``` cpp
+string s = "I love C++";
+s.replace(7, 3, "Java");  // Kết quả: "I love Java"
+```
+
+### 2.7. Xóa chuỗi
+
+``` cpp
+string s = "abcdef";
+s.erase(2, 3);   // Xóa từ vị trí 2, 3 ký tự => "abf"
+```
+
+### 2.8. Lấy con chuỗi (substr)
+
+``` cpp
+string s = "Hello World";
+string sub = s.substr(0, 5); // "Hello"
+```
+
+### 2.9. Chuyển kiểu dữ liệu
+
+``` cpp
+string numStr = "123";
+int num = stoi(numStr);     // Chuyển sang int
+string s = to_string(456);  // Chuyển int sang string
+```
+
+------------------------------------------------------------------------
+
+## 3. Tổng kết
+
+-   `std::string` trong C++ hỗ trợ nhiều phương thức tiện lợi.
+-   Các thao tác phổ biến: **lấy độ dài, nối, so sánh, tìm kiếm, thay
+    thế, xóa, cắt chuỗi, chuyển đổi kiểu dữ liệu.**
+
