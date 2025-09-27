@@ -900,4 +900,88 @@ string s = to_string(456);  // Chuyển int sang string
 -   `std::string` trong C++ hỗ trợ nhiều phương thức tiện lợi.
 -   Các thao tác phổ biến: **lấy độ dài, nối, so sánh, tìm kiếm, thay
     thế, xóa, cắt chuỗi, chuyển đổi kiểu dữ liệu.**
+# 📘 Hàm, Tham số và Đối số trong C++
+
+## 1. Hàm là gì?
+- **Hàm** là một khối lệnh được định nghĩa để thực hiện một công việc cụ thể.
+- Hàm giúp chia chương trình thành các phần nhỏ, dễ quản lý, tái sử dụng và giảm trùng lặp code.
+
+**Cú pháp định nghĩa hàm:**
+```cpp
+<kiểu_trả_về> <tên_hàm>(<danh_sách_tham_số>) {
+    // khối lệnh
+    return <giá_trị_trả_về>;
+}
+```
+
+**Ví dụ:**
+```cpp
+int sum(int a, int b) {
+    return a + b;
+}
+```
+
+---
+
+## 2. Tham số và Đối số
+
+### Tham số (Parameter)
+- Là biến được khai báo trong phần định nghĩa hàm.
+- Nó đóng vai trò **nhận dữ liệu** từ bên ngoài truyền vào.
+
+**Ví dụ:**
+```cpp
+int sum(int a, int b)  // a và b là tham số
+{
+    return a + b;
+}
+```
+
+### Đối số (Argument)
+- Là giá trị hoặc biến **thực tế** được truyền cho tham số khi gọi hàm.
+
+**Ví dụ:**
+```cpp
+int main() {
+    int result = sum(3, 5); // 3 và 5 là đối số
+    cout << result; // Kết quả: 8
+}
+```
+
+---
+
+## 3. Đối số mặc định (Default Argument)
+
+- Đối số mặc định là giá trị được gán sẵn cho tham số trong định nghĩa hàm.
+- Khi gọi hàm **không truyền đối số** cho tham số đó thì chương trình sẽ dùng giá trị mặc định.
+
+**Cú pháp:**
+```cpp
+<kiểu_trả_về> <tên_hàm>(<kiểu tham_số> tên = giá_trị_mặc_định) {
+    // code
+}
+```
+
+**Ví dụ:**
+```cpp
+int sum(int a, int b = 10) {
+    return a + b;
+}
+
+int main() {
+    cout << sum(5) << endl;    // chỉ truyền 1 đối số, b sẽ lấy mặc định = 10 → Kết quả: 15
+    cout << sum(5, 20) << endl; // truyền đủ 2 đối số → Kết quả: 25
+    return 0;
+}
+```
+
+---
+
+## 4. Tóm tắt
+- **Hàm**: Khối lệnh có thể tái sử dụng.  
+- **Tham số**: Biến khai báo trong hàm, nhận dữ liệu từ bên ngoài.  
+- **Đối số**: Giá trị thực tế truyền vào khi gọi hàm.  
+- **Đối số mặc định**: Cho phép gán giá trị mặc định cho tham số, giúp lời gọi hàm linh hoạt hơn.  
+
+---
 
