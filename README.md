@@ -984,4 +984,192 @@ int main() {
 - **Đối số mặc định**: Cho phép gán giá trị mặc định cho tham số, giúp lời gọi hàm linh hoạt hơn.  
 
 ---
+# Tham chiếu – Tham trị, Hàm nguyên mẫu và Đệ quy (C++)
 
+Tài liệu này tổng hợp ba chủ đề nền tảng trong C++: **truyền tham trị** (*pass by value*), **truyền tham chiếu** (*pass by reference*), **hàm nguyên mẫu** (*function prototype*), và **đệ quy** (*recursion*). Ví dụ đi kèm đều tối giản, dễ chạy và dễ so sánh.
+
+---
+
+## 1) Truyền tham trị vs. Truyền tham chiếu
+
+### 1.1. Tham trị (*pass by value*)
+- **Hàm nhận bản sao** của đối số.
+- Thay đổi bên trong **không ảnh hưởng** biến gốc bên ngoài.
+- Dùng khi: dữ liệu nhỏ (int, double, bool, …) và **không muốn** sửa biến gốc.
+
+```cpp
+#include <iostream>
+using namespace std;
+
+void add_one_by_value(int x) {
+    x += 1;             // chỉ thay đổi bản sao
+}
+
+int main() {
+    int a = 5;
+    add_one_by_value(a);
+    cout << a << endl;  // 5 (không đổi)
+}
+```
+
+### 1.2. Tham chiếu (*pass by reference*)
+- **Hàm nhận “bí danh”** (alias) của biến gốc: `type&`.
+- Thay đổi trong hàm **tác động trực tiếp** tới biến gốc.
+- Dùng khi: cần **ghi ra kết quả**, hoặc **tránh copy** dữ liệu lớn (vector, struct lớn), hoặc cần **hoán đổi**.
+
+```cpp
+#include <iostream>
+using namespace std;
+
+void add_one_by_ref(int& x) {
+    x += 1;             // thay đổi trực tiếp biến gốc
+}
+
+int main() {
+    int a = 5;
+    add_one_by_ref(a);
+    cout << a << endl;  // 6
+}
+```
+
+### 1.3. So sánh nhanh
+| Tiêu chí                 | Tham trị (value)            | Tham chiếu (reference)      |
+|-------------------------|-----------------------------|-----------------------------|
+| Dữ liệu truyền vào      | Bản sao                     | “Bí danh” của biến gốc      |
+| Ảnh hưởng biến gốc      | Không                        | Có                          |
+| Chi phí copy            | Có (tùy kích thước)         | Không (chỉ là alias)        |
+| An toàn side‑effect     | Cao (ít bị đổi ngoài ý muốn)| Thấp hơn (có thể bị đổi)    |
+| Trường hợp điển hình    | Đọc dữ liệu, dữ liệu nhỏ     | Ghi kết quả, dữ liệu lớn    |
+
+### 1.4. Ví dụ hoán đổi (swap)
+```cpp
+#include <iostream>
+using namespace std;
+
+void my_swap(int& a, int& b) {
+    int t = a;
+    a = b;
+    b = t;
+}
+
+int main() {
+    int x = 2, y = 3;
+    my_swap(x, y);
+    cout << x << " " << y << endl; // 3 2
+}
+```
+
+> Lưu ý: Con trỏ (*pointer*) cũng truyền được “tham chiếu gián tiếp”. Tuy nhiên với C++ hiện đại, **reference** thường gọn và an toàn hơn cho API.
+
+---
+
+## 2) Hàm nguyên mẫu (*function prototype*)
+
+### 2.1. Khái niệm
+**Hàm nguyên mẫu** là **khai báo trước** chữ ký hàm (tên, kiểu trả về, danh sách tham số) để **trình biên dịch biết** về hàm trước khi hàm đó được định nghĩa hay được gọi.
+
+### 2.2. Khi nào cần prototype? 
+- Khi **gọi hàm trước khi định nghĩa** (thứ tự file hoặc thứ tự trong cùng file).
+- Khi tách **.h** / **.cpp**: prototype đặt trong **.h**, định nghĩa trong **.cpp**.
+
+### 2.3. Ví dụ
+```cpp
+#include <iostream>
+using namespace std;
+
+// Prototype
+int sum(int a, int b);       // chỉ cần chữ ký
+void hello();                // có thể bỏ tên tham số
+
+int main() {
+    cout << sum(3, 4) << endl; // OK, vì đã có prototype
+    hello();
+    return 0;
+}
+
+// Định nghĩa (sau main vẫn được)
+int sum(int a, int b) {
+    return a + b;
+}
+
+void hello() {
+    cout << "Hello!" << endl;
+}
+```
+
+> Lợi ích: tách bạch **giao diện** (prototype) và **triển khai** (định nghĩa), cải thiện khả năng **biên dịch từng phần** và **tổ chức dự án**.
+
+---
+
+## 3) Đệ quy (*recursion*)
+
+### 3.1. Khái niệm
+Hàm **tự gọi lại chính nó** để giải bài toán bằng cách chia nhỏ thành các **trường hợp con**.
+
+3 thành phần quan trọng:
+1. **Bài toán cơ sở** (*base case*): điều kiện dừng, trả kết quả trực tiếp.
+2. **Bước đệ quy** (*recursive step*): gọi lại chính hàm với bài toán nhỏ hơn.
+3. **Tiến về cơ sở**: mỗi lần gọi làm **giảm** kích thước bài toán.
+
+### 3.2. Ví dụ: Giai thừa `n!`
+```cpp
+#include <iostream>
+using namespace std;
+
+unsigned long long fact_rec(int n) {
+    if (n == 0 || n == 1) return 1;     // base case
+    return 1ULL * n * fact_rec(n - 1);  // recursive step
+}
+
+unsigned long long fact_loop(int n) {    // phiên bản vòng lặp để so sánh
+    unsigned long long r = 1;
+    for (int i = 2; i <= n; ++i) r *= i;
+    return r;
+}
+
+int main() {
+    int n; cin >> n;
+    cout << fact_rec(n) << "\n";
+}
+```
+
+### 3.3. Ví dụ: Tổng số nguyên tố từ 2 → n (đệ quy)
+```cpp
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+bool is_prime(int x) {
+    if (x < 2) return false;
+    for (int i = 2; i <= (int)sqrt(x); ++i)
+        if (x % i == 0) return false;
+    return true;
+}
+
+int sum_primes_rec(int n) {
+    if (n < 2) return 0;                      // base case
+    return (is_prime(n) ? n : 0) + sum_primes_rec(n - 1);
+}
+
+int main() {
+    int n; cin >> n;
+    cout << sum_primes_rec(n) << "\n";
+}
+```
+
+### 3.4. Lưu ý hiệu năng và ngăn xếp
+- Đệ quy **dễ đọc** cho bài toán tự nhiên (cây, chia để trị, DFS, backtracking…).
+- Nhưng gọi hàm lồng nhau tốn **stack**. Với `n` lớn, cân nhắc:
+  - Dùng **vòng lặp** nếu thuận lợi.
+  - Dùng **đệ quy đuôi** (*tail recursion*) + tối ưu (tùy compiler).
+  - Hoặc chuyển thành **phi đệ quy** bằng stack/queue tự quản.
+
+---
+
+## 4) FAQ / Mẹo nhanh
+
+- **Khi nào dùng tham chiếu?** Khi cần sửa biến gốc, trả nhiều kết quả, hoặc tránh copy dữ liệu nặng.
+- **Prototype có bắt buộc không?** Không nếu bạn **định nghĩa** hàm **trước** khi gọi; nhưng trong dự án thực tế, prototype (hoặc khai báo trong header) gần như luôn hiện diện.
+- **Đệ quy vs. vòng lặp?** Vòng lặp thường hiệu quả hơn, nhưng đệ quy biểu đạt thuật toán rõ ràng cho các cấu trúc phân nhánh/cây.
+
+---
