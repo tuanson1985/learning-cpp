@@ -1173,3 +1173,235 @@ int main() {
 - **Đệ quy vs. vòng lặp?** Vòng lặp thường hiệu quả hơn, nhưng đệ quy biểu đạt thuật toán rõ ràng cho các cấu trúc phân nhánh/cây.
 
 ---
+
+# Ghi chú C++: Con trỏ, Cấp phát động, Mảng động
+
+> Tài liệu tóm tắt dành cho luyện tập C/C++ cơ bản. Ví dụ đều **giữ nguyên code gốc** theo phong cách đơn giản, dễ chạy nhanh trên mọi trình biên dịch.
+
+---
+
+## 1) Con trỏ (Pointer)
+
+### Khái niệm
+- **Con trỏ** là biến lưu **địa chỉ** của một vùng nhớ (thường là địa chỉ của biến khác hoặc phần tử mảng).
+- Kiểu của con trỏ phải **phù hợp** với kiểu dữ liệu mà nó trỏ tới.
+
+```cpp
+int a = 10;
+int *p = &a;      // p trỏ tới a
+cout << *p;       // dereference: in ra 10
+```
+
+### Toán tử liên quan
+- `&x`: lấy **địa chỉ** của `x` (address-of).
+- `*p`: **giải tham chiếu** (dereference) để truy cập giá trị tại địa chỉ mà `p` trỏ tới.
+
+```cpp
+int x = 5;
+int *ptr = &x;
+cout << &x << " vs " << ptr << endl; // 2 cách in cùng 1 địa chỉ
+cout << *ptr << endl;                // 5
+```
+
+### Con trỏ null & kiểm tra an toàn
+- Sử dụng `nullptr` (C++11+) thay vì `NULL`/`0`.
+- **Luôn** kiểm tra `p != nullptr` trước khi dereference.
+
+```cpp
+int *p = nullptr;
+if (p) cout << *p; // sẽ không chạy nếu p là nullptr
+```
+
+### Phạm vi & con trỏ treo (dangling pointer)
+- Không trả về địa chỉ biến **cục bộ** (đã out-of-scope).
+- Xoá vùng nhớ động xong cần **gán lại** con trỏ về `nullptr`.
+
+```cpp
+int *q = new int(7);
+delete q;
+q = nullptr; // tránh dùng q nữa khi vùng nhớ đã giải phóng
+```
+
+### `const` với con trỏ
+```cpp
+int x = 1, y = 2;
+const int *p1 = &x;   // không đổi *p1, có thể đổi p1 -> y
+int * const p2 = &x;  // đổi *p2 được, không đổi p2 (địa chỉ) được
+const int * const p3 = &x; // không đổi cả *p3 lẫn p3
+```
+
+### Số học con trỏ (pointer arithmetic)
+- Dịch chuyển theo **bội số kích thước** phần tử.
+```cpp
+int arr[3] = {10, 20, 30};
+int *p = arr;       // trỏ arr[0]
+cout << *(p+1);     // 20
+```
+
+---
+
+## 2) Cấp phát động (Dynamic Allocation)
+
+### `new` / `delete` cho 1 biến
+```cpp
+int *p = new int;   // cấp phát 1 int chưa khởi tạo
+*p = 42;
+cout << *p << endl; // 42
+delete p;           // giải phóng
+p = nullptr;
+```
+
+### `new[]` / `delete[]` cho mảng
+```cpp
+int n = 5;
+int *a = new int[n];     // mảng động n phần tử
+for (int i = 0; i < n; ++i) a[i] = i*i;
+delete[] a;              // giải phóng mảng
+a = nullptr;
+```
+
+> **Lưu ý quan trọng**
+> - Dùng `new` thì phải `delete`. Dùng `new[]` thì phải `delete[]`.
+> - Tránh rò rỉ bộ nhớ (memory leak) bằng cách `delete` đúng nơi, đúng lúc.
+> - Với C++ hiện đại, ưu tiên `std::vector`, `std::unique_ptr`/`std::make_unique` nếu được phép.
+
+```cpp
+// thay cho mảng động thủ công:
+#include <vector>
+std::vector<int> v(n);
+```
+
+---
+
+## 3) Mảng động thao tác chèn / xoá bằng con trỏ
+
+> Phần này minh hoạ **cách thủ công** (không dùng `vector`) theo yêu cầu bài tập.
+
+### 3.1 Thêm phần tử vào cuối
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    int n; cin >> n;                 // n <= 10
+    int *a = new int[n+1];           // dư chỗ 1 phần tử
+    for (int i = 0; i < n; ++i) cin >> a[i];
+    int x; cin >> x;                 // phần tử thêm
+    a[n] = x;                        // chèn cuối
+    ++n;
+    for (int i = 0; i < n; ++i) cout << a[i] << " ";
+    delete[] a;
+    return 0;
+}
+```
+
+### 3.2 Xoá phần tử tại vị trí `pos` (0 <= pos < n)
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    int n; cin >> n;
+    int *a = new int[n];
+    for (int i = 0; i < n; ++i) cin >> a[i];
+    int pos; cin >> pos;
+    if (0 <= pos && pos < n) {
+        for (int i = pos; i < n - 1; ++i) a[i] = a[i+1];
+        --n;
+    }
+    for (int i = 0; i < n; ++i) cout << a[i] << " ";
+    delete[] a;
+    return 0;
+}
+```
+
+### 3.3 Chèn `y` vào vị trí `pos` (0 <= pos <= n)
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    int n; cin >> n;
+    int *a = new int[n+1];                 // dư 1 ô
+    for (int i = 0; i < n; ++i) cin >> a[i];
+    int pos, y; cin >> pos >> y;
+    if (0 <= pos && pos <= n) {
+        for (int i = n; i > pos; --i) a[i] = a[i-1];
+        a[pos] = y;
+        ++n;
+    }
+    for (int i = 0; i < n; ++i) cout << a[i] << " ";
+    delete[] a;
+    return 0;
+}
+```
+
+### 3.4 Sắp xếp tăng dần (Bubble Sort cơ bản)
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    int n; cin >> n;
+    int *a = new int[n];
+    for (int i = 0; i < n; ++i) cin >> a[i];
+
+    for (int i = 0; i < n - 1; ++i) {
+        for (int j = 0; j < n - i - 1; ++j) {
+            if (a[j] > a[j+1]) {
+                int t = a[j]; a[j] = a[j+1]; a[j+1] = t;
+            }
+        }
+    }
+    for (int i = 0; i < n; ++i) cout << a[i] << " ";
+    delete[] a;
+    return 0;
+}
+```
+
+---
+
+## 4) Lỗi thường gặp & mẹo tránh lỗi
+
+1. **Quên `delete`/`delete[]`** → rò rỉ bộ nhớ.
+2. Dùng `delete` thay vì `delete[]` cho mảng → **UB** (hành vi không xác định).
+3. **Dangling pointer**: tiếp tục dùng con trỏ sau khi đã `delete` → gán `nullptr` ngay sau khi xoá.
+4. Truy cập ngoài biên (`index` âm hoặc ≥ `n`) → kiểm tra dữ liệu vào/ra.
+5. **Sao chép con trỏ**: nhiều con trỏ cùng trỏ một vùng nhớ động → cần quy ước sở hữu rõ ràng, hoặc dùng smart pointer.
+
+---
+
+## 5) Khi nào nên dùng `std::vector`?
+- Khi kích thước mảng **có thể thay đổi** hoặc cần nhiều thao tác chèn/xoá.
+- Khi muốn **an toàn bộ nhớ**, tự quản lý cấp phát/giải phóng.
+- Khi cần tích hợp với **thuật toán STL** (`sort`, `lower_bound`, ...).
+
+Ví dụ nhanh:
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    vector<int> v = {1,2,3,4};
+    v.push_back(5);
+    v.erase(v.begin() + 1);  // xoá tại vị trí 1
+    v.insert(v.begin() + 1, 7); // chèn 7 tại vị trí 1
+    sort(v.begin(), v.end());   // sắp xếp tăng dần
+    for (int x : v) cout << x << " ";
+}
+```
+
+---
+
+## 6) Checklist nhanh trước khi nộp bài
+- [ ] Không truy cập con trỏ chưa khởi tạo.
+- [ ] Dùng `nullptr` thay cho `NULL`/`0`.
+- [ ] `new` ↔ `delete`, `new[]` ↔ `delete[]` đúng cặp.
+- [ ] Kiểm tra ranh giới `0 <= pos <= n` trước khi chèn/xoá.
+- [ ] Gán `ptr = nullptr` sau khi `delete`.
+- [ ] Với bài thực tế: cân nhắc `std::vector`.
+
+---
+
+> Gợi ý mở rộng: Viết menu 1 file duy nhất (1,2,3,4) để chọn thao tác cho mảng động; tách các thao tác thành hàm riêng nhận `int *&a, int &n` để luyện tham chiếu con trỏ.
+
