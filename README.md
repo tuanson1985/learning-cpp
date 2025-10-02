@@ -1404,4 +1404,376 @@ int main() {
 ---
 
 > Gợi ý mở rộng: Viết menu 1 file duy nhất (1,2,3,4) để chọn thao tác cho mảng động; tách các thao tác thành hàm riêng nhận `int *&a, int &n` để luyện tham chiếu con trỏ.
+# Struct & File Handling trong **C++** (README)
+
+---
+
+## Mục lục
+1. [Struct trong C++](#struct-trong-c)
+   - Khai báo, khởi tạo
+   - Con trỏ, tham chiếu, vector
+   - `struct` vs `class`
+   - Padding & alignment khi ghi nhị phân
+2. [Các chế độ mở file (C++ `<fstream>`)](#các-chế-độ-mở-file-c-fstream)
+3. [Làm việc với **file văn bản (text)**](#làm-việc-với-file-văn-bản-text)
+   - Ghi/đọc dòng (`<<`, `>>`, `std::getline`)
+   - Đọc CSV đơn giản
+   - Xử lý lỗi, exceptions, RAII
+4. [Làm việc với **file nhị phân (binary)**](#làm-việc-với-file-nhị-phân-binary)
+   - Ghi/đọc kiểu cơ bản
+   - Serialize `std::string` (độ dài biến thiên)
+   - Lưu/đọc vector `struct` có string
+   - Bản ghi **kích thước cố định** & random-access (`seekg/seekp`)
+   - Endianness & tính di động
+5. [Bài tập & Gợi ý kiểm thử](#bài-tập--gợi-ý-kiểm-thử)
+6. [Bài mẫu hoàn chỉnh (C++17)](#bài-mẫu-hoàn-chỉnh-c17)
+
+---
+
+## Struct trong C++
+
+### Khai báo & khởi tạo
+```cpp
+#include <string>
+#include <iostream>
+#include <vector>
+
+struct SinhVien {
+    std::string ma;
+    std::string ten;
+    int tuoi{};
+    double diem{};
+
+    void print() const {
+        std::cout << ma << " | " << ten << " | " << tuoi << " | " << diem << "\n";
+    }
+};
+
+int main() {
+    SinhVien a{"SV001", "Nguyen Van A", 20, 8.5};
+    a.print();
+
+    std::vector<SinhVien> ds = {
+        {"SV002", "Le Thi B", 19, 7.8},
+        {"SV003", "Tran C",   21, 9.0}
+    };
+    for (const auto& sv : ds) sv.print();
+}
+```
+
+### Con trỏ & tham chiếu
+```cpp
+void tangDiem(SinhVien& sv, double delta) { sv.diem += delta; } // tham chiếu
+void inPtr(const SinhVien* p) { if (p) std::cout << p->ten << "\n"; } // con trỏ
+```
+
+### `struct` vs `class`
+- Mặc định **public** cho `struct`, **private** cho `class`. Còn lại tương tự.
+
+### Padding & alignment
+- Trình biên dịch có thể chèn **padding** trong `struct`. Khi ghi **binary** trực tiếp cả khối nhớ (`write(&sv, sizeof sv)`) có thể **không tương thích** giữa compiler/kiến trúc.
+- Giải pháp an toàn: **serialize thủ công** từng trường (đặc biệt với `std::string`).
+
+---
+
+## Các chế độ mở file (C++ `<fstream>`)
+
+| Mô tả                         | Cờ dùng với `<fstream>`                                  |
+|------------------------------|-----------------------------------------------------------|
+| Đọc text                     | `std::ios::in`                                           |
+| Ghi text (xóa cũ)            | `std::ios::out` (mặc định kèm `trunc`)                   |
+| Ghi nối cuối                 | `std::ios::out | std::ios::app`                          |
+| Đọc + ghi                    | `std::ios::in | std::ios::out`                           |
+| Nhị phân (thêm cho mọi mode) | `std::ios::binary`                                       |
+| Đặt con trỏ cuối khi mở      | `std::ios::ate`                                          |
+| Không xóa cũ khi `out`       | thêm `std::ios::app` hoặc bỏ `trunc` bằng `std::fstream` |
+
+> Có thể **OR** nhiều cờ: `std::fstream fs("data.bin", std::ios::in | std::ios::out | std::ios::binary);`
+
+---
+
+## Làm việc với **file văn bản (text)**
+
+```cpp
+#include <fstream>
+#include <string>
+#include <iostream>
+#include <sstream>
+```
+
+### Ghi & đọc dòng
+```cpp
+// Ghi text
+std::ofstream fout("out.txt"); // out|trunc
+if (!fout) { std::cerr << "Mo file that bai\n"; }
+fout << "Hello\n" << 123 << ' ' << 45.6 << "\n";
+
+// Đọc từng dòng
+std::ifstream fin("out.txt");
+std::string line;
+while (std::getline(fin, line)) {
+    std::cout << "LINE: " << line << "\n";
+}
+
+// Lưu ý khi trộn >> và getline
+// int n; std::cin >> n; std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+```
+
+### Đọc CSV đơn giản
+```cpp
+#include <vector>
+
+struct Row { std::string c1, c2, c3; };
+
+std::vector<Row> readCsv(const std::string& path) {
+    std::ifstream f(path);
+    std::vector<Row> out;
+    std::string line;
+    while (std::getline(f, line)) {
+        std::istringstream ss(line);
+        Row r;
+        std::getline(ss, r.c1, ',');
+        std::getline(ss, r.c2, ',');
+        std::getline(ss, r.c3, ',');
+        out.push_back(r);
+    }
+    return out;
+}
+```
+
+### Xử lý lỗi & exceptions
+```cpp
+std::ifstream fin("a.txt");
+if (!fin) { /* báo lỗi & thoát */ }
+
+// Hoặc dùng exceptions
+fin.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+try {
+    // đọc...
+} catch (const std::ios_base::failure& e) {
+    std::cerr << "IO error: " << e.what() << "\n";
+}
+```
+
+---
+
+## Làm việc với **file nhị phân (binary)**
+
+> Khi làm binary trên Windows, **bắt buộc** thêm `std::ios::binary` để tránh chuyển đổi `\n` ↔ `\r\n`.
+
+### Ghi/đọc kiểu cơ bản
+```cpp
+#include <vector>
+std::vector<int> a = {1,2,3,4,5};
+
+// Ghi
+{
+    std::ofstream f("data.bin", std::ios::binary);
+    f.write(reinterpret_cast<const char*>(a.data()), a.size() * sizeof(int));
+}
+
+// Đọc
+{
+    std::ifstream f("data.bin", std::ios::binary);
+    std::vector<int> b(5);
+    f.read(reinterpret_cast<char*>(b.data()), b.size() * sizeof(int));
+}
+```
+
+### Serialize `std::string` (độ dài biến thiên)
+```cpp
+#include <cstdint>
+
+void writeString(std::ostream& os, const std::string& s) {
+    uint32_t len = static_cast<uint32_t>(s.size());
+    os.write(reinterpret_cast<const char*>(&len), sizeof(len));
+    os.write(s.data(), len);
+}
+
+std::string readString(std::istream& is) {
+    uint32_t len{};
+    is.read(reinterpret_cast<char*>(&len), sizeof(len));
+    std::string s(len, '\0');
+    is.read(s.data(), len);
+    return s;
+}
+```
+
+### Lưu/đọc vector `struct` có string
+```cpp
+struct SinhVien {
+    std::string ma, ten;
+    int32_t tuoi{};
+    double diem{};
+};
+
+void writeSV(std::ostream& os, const SinhVien& sv) {
+    writeString(os, sv.ma);
+    writeString(os, sv.ten);
+    os.write(reinterpret_cast<const char*>(&sv.tuoi), sizeof(sv.tuoi));
+    os.write(reinterpret_cast<const char*>(&sv.diem), sizeof(sv.diem));
+}
+
+SinhVien readSV(std::istream& is) {
+    SinhVien sv;
+    sv.ma  = readString(is);
+    sv.ten = readString(is);
+    is.read(reinterpret_cast<char*>(&sv.tuoi), sizeof(sv.tuoi));
+    is.read(reinterpret_cast<char*>(&sv.diem), sizeof(sv.diem));
+    return sv;
+}
+
+void saveAll(const std::vector<SinhVien>& v, const std::string& path) {
+    std::ofstream f(path, std::ios::binary);
+    uint32_t n = static_cast<uint32_t>(v.size());
+    f.write(reinterpret_cast<const char*>(&n), sizeof(n));
+    for (const auto& sv : v) writeSV(f, sv);
+}
+
+std::vector<SinhVien> loadAll(const std::string& path) {
+    std::ifstream f(path, std::ios::binary);
+    uint32_t n{}; f.read(reinterpret_cast<char*>(&n), sizeof(n));
+    std::vector<SinhVien> v; v.reserve(n);
+    for (uint32_t i=0; i<n; ++i) v.push_back(readSV(f));
+    return v;
+}
+```
+
+### Bản ghi kích thước cố định & random-access
+> Chỉ dùng khi **không có `std::string`**, mà là `char[]` cố định.
+
+```cpp
+#pragma pack(push, 1) // tắt padding (cân nhắc hiệu năng)
+struct Record {
+    char ma[16];   // <=15 + '\0'
+    char ten[40];  // <=39 + '\0'
+    int32_t tuoi;
+    double diem;
+};
+#pragma pack(pop)
+
+void writeRecords(const std::vector<Record>& v, const std::string& path) {
+    std::ofstream f(path, std::ios::binary | std::ios::trunc);
+    f.write(reinterpret_cast<const char*>(v.data()), v.size() * sizeof(Record));
+}
+
+std::vector<Record> readRecords(const std::string& path) {
+    std::ifstream f(path, std::ios::binary);
+    f.seekg(0, std::ios::end);
+    std::streamsize sz = f.tellg();
+    f.seekg(0);
+    std::vector<Record> v(sz / sizeof(Record));
+    f.read(reinterpret_cast<char*>(v.data()), sz);
+    return v;
+}
+
+// cập nhật bản ghi thứ i (0-based)
+void updateRecordAt(const std::string& path, size_t i, const Record& rec) {
+    std::fstream fs(path, std::ios::binary | std::ios::in | std::ios::out);
+    fs.seekp(i * sizeof(Record), std::ios::beg);
+    fs.write(reinterpret_cast<const char*>(&rec), sizeof(Record));
+}
+```
+
+### Endianness & tính di động
+- Đa số PC dùng **little-endian**. Nếu trao đổi giữa hệ khác nhau, cân nhắc:
+  - Serialize trường theo định dạng tự mô tả (protobuf/CBOR/JSON + base64), hoặc
+  - Chuẩn hóa **endianness** và dùng kiểu có kích thước cố định (`std::uint32_t`, `float`, ...).
+
+---
+
+## Bài tập & Gợi ý kiểm thử
+1. **Text**: Đọc `sv.txt` (mỗi dòng `ma,ten,tuoi,diem`) vào `vector<SinhVien>`, in top-3 điểm cao nhất.
+2. **Binary (var-len)**: Serialize `vector<SinhVien>` xuống `sv.bin`, đọc lại so sánh dữ liệu.
+3. **Binary (fixed)**: Ghi 100k `Record`, dùng `seekp` cập nhật bản ghi ở giữa; đo thời gian.
+4. **CSV**: Ghi `sv.csv`, chú ý tên chứa dấu phẩy → cần bọc `"` và escape `"` bên trong.
+5. **Exceptions**: Bật exceptions cho `ifstream`, thử đọc file hỏng để bắt lỗi.
+
+---
+
+## Bài mẫu hoàn chỉnh (C++17)
+
+> Một file demo ngắn: ghi & đọc **text** + **binary var-len** cho `SinhVien`.
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+struct SinhVien {
+    string ma, ten; int32_t tuoi{}; double diem{};
+    void print() const {
+        cout << ma << " | " << ten << " | " << tuoi << " | " << fixed << setprecision(2) << diem << "\n";
+    }
+};
+
+void writeString(ostream& os, const string& s) {
+    uint32_t len = (uint32_t)s.size();
+    os.write(reinterpret_cast<const char*>(&len), sizeof(len));
+    os.write(s.data(), len);
+}
+string readString(istream& is) {
+    uint32_t len{}; is.read(reinterpret_cast<char*>(&len), sizeof(len));
+    string s(len, '\0'); is.read(s.data(), len); return s;
+}
+void writeSV(ostream& os, const SinhVien& sv) {
+    writeString(os, sv.ma); writeString(os, sv.ten);
+    os.write(reinterpret_cast<const char*>(&sv.tuoi), sizeof(sv.tuoi));
+    os.write(reinterpret_cast<const char*>(&sv.diem), sizeof(sv.diem));
+}
+SinhVien readSV(istream& is) {
+    SinhVien sv; sv.ma = readString(is); sv.ten = readString(is);
+    is.read(reinterpret_cast<char*>(&sv.tuoi), sizeof(sv.tuoi));
+    is.read(reinterpret_cast<char*>(&sv.diem), sizeof(sv.diem)); return sv;
+}
+
+int main() {
+    vector<SinhVien> ds = {
+        {"SV001","Nguyen Van A",20,8.5},
+        {"SV002","Le Thi B",19,7.8},
+        {"SV003","Tran C",21,9.0}
+    };
+
+    // 1) TEXT: ghi
+    {
+        ofstream f("sv.txt");
+        for (auto& s : ds) f << s.ma << "," << s.ten << "," << s.tuoi << "," << s.diem << "\n";
+    }
+    // 1) TEXT: đọc
+    {
+        ifstream f("sv.txt");
+        string line;
+        cout << "==== DOC TEXT ====\n";
+        while (getline(f, line)) cout << line << "\n";
+    }
+
+    // 2) BINARY: ghi var-len
+    {
+        ofstream f("sv.bin", ios::binary);
+        uint32_t n = (uint32_t)ds.size();
+        f.write(reinterpret_cast<const char*>(&n), sizeof(n));
+        for (auto& s : ds) writeSV(f, s);
+    }
+    // 2) BINARY: đọc var-len
+    {
+        ifstream f("sv.bin", ios::binary);
+        uint32_t n{}; f.read(reinterpret_cast<char*>(&n), sizeof(n));
+        cout << "==== DOC BINARY ====\n";
+        for (uint32_t i=0;i<n;++i) { readSV(f).print(); }
+    }
+    return 0;
+}
+```
+
+### Biên dịch
+```bash
+g++ -std=c++17 -O2 main.cpp -o app
+./app
+```
+
+---
+
+### Kết
+- **Text**: dễ đọc/ghi log, config, CSV.
+- **Binary**: gọn/nhanh/định lượng chính xác; cần chú ý **endianness** & **serialize**.
+- `struct` trong C++ linh hoạt (có hàm thành viên), nhưng khi ghi nhị phân: ưu tiên **serialize thủ công**.
 
