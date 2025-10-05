@@ -1777,3 +1777,356 @@ g++ -std=c++17 -O2 main.cpp -o app
 - **Binary**: gọn/nhanh/định lượng chính xác; cần chú ý **endianness** & **serialize**.
 - `struct` trong C++ linh hoạt (có hàm thành viên), nhưng khi ghi nhị phân: ưu tiên **serialize thủ công**.
 
+# Hướng Đối Tượng (OOP) trong C++
+
+## Mục lục
+1. [Class và Object](#class-và-object)
+2. [Tính đóng gói (Encapsulation)](#tính-đóng-gói-encapsulation)
+3. [Con trỏ và Object](#con-trỏ-và-object)
+4. [Tính kế thừa (Inheritance)](#tính-kế-thừa-inheritance)
+5. [Thuộc tính truy cập và kiểu kế thừa](#thuộc-tính-truy-cập-và-kiểu-kế-thừa)
+6. [Tính đa hình (Polymorphism)](#tính-đa-hình-polymorphism)
+7. [Phương thức ảo (Virtual Function)](#phương-thức-ảo-virtual-function)
+8. [Tính trừu tượng (Abstraction)](#tính-trừu-tượng-abstraction)
+9. [Hàm bạn (Friend Function)](#hàm-bạn-friend-function)
+10. [Lớp bạn (Friend Class)](#lớp-bạn-friend-class)
+11. [Bài tập có lời giải](#bài-tập-có-lời-giải)
+12. [Tổng kết](#tổng-kết)
+
+---
+
+## Class và Object
+**Class** là bản thiết kế (mẫu) để tạo ra **Object**. Một class bao gồm các thuộc tính (attributes) và hành vi (methods).  
+**Object** là thực thể cụ thể của class.
+
+```cpp
+class Student {
+public:
+    string name;
+    int age;
+
+    void display() {
+        cout << name << " - " << age << endl;
+    }
+};
+
+int main() {
+    Student s1;
+    s1.name = "Sơn";
+    s1.age = 22;
+    s1.display();
+}
+```
+
+---
+
+## Tính đóng gói (Encapsulation)
+Đóng gói giúp che giấu dữ liệu bên trong đối tượng, chỉ cho phép truy cập thông qua các phương thức công khai.
+
+```cpp
+class BankAccount {
+private:
+    double balance;
+
+public:
+    void deposit(double amount) { balance += amount; }
+    double getBalance() { return balance; }
+};
+```
+
+---
+
+## Con trỏ và Object
+Con trỏ có thể trỏ đến đối tượng và truy cập thành viên bằng toán tử `->`.
+
+```cpp
+Student s1;
+Student* ptr = &s1;
+ptr->name = "Tuấn";
+ptr->age = 21;
+ptr->display();
+```
+
+---
+
+## Tính kế thừa (Inheritance)
+Cho phép tạo lớp mới dựa trên lớp cũ, kế thừa toàn bộ thuộc tính và phương thức.
+
+```cpp
+class Animal {
+public:
+    void eat() { cout << "Eating..." << endl; }
+};
+
+class Dog : public Animal {
+public:
+    void bark() { cout << "Barking..." << endl; }
+};
+```
+
+---
+
+## Thuộc tính truy cập và kiểu kế thừa
+- **public:** Giữ nguyên mức truy cập.
+- **protected:** Cho phép lớp con truy cập.
+- **private:** Không cho lớp con truy cập.
+
+```cpp
+class A {
+protected:
+    int x;
+};
+
+class B : public A {
+public:
+    void setX(int val) { x = val; }
+    void show() { cout << x; }
+};
+```
+
+---
+
+## Tính đa hình (Polymorphism)
+### Nạp chồng (Overloading)
+Cùng tên hàm, khác tham số.
+
+```cpp
+class Print {
+public:
+    void show(int x) { cout << x; }
+    void show(string s) { cout << s; }
+};
+```
+
+### Ghi đè (Overriding)
+Lớp con định nghĩa lại hàm của lớp cha.
+
+```cpp
+class Animal {
+public:
+    virtual void sound() { cout << "Some sound"; }
+};
+
+class Dog : public Animal {
+public:
+    void sound() override { cout << "Woof!"; }
+};
+```
+
+---
+
+## Phương thức ảo (Virtual Function)
+Dùng để thực hiện đa hình động (runtime polymorphism).
+
+```cpp
+Animal* a = new Dog();
+a->sound(); // Output: Woof!
+```
+
+---
+
+## Tính trừu tượng (Abstraction)
+Ẩn chi tiết cài đặt và chỉ cung cấp giao diện cần thiết, thường dùng **class trừu tượng**.
+
+```cpp
+class Shape {
+public:
+    virtual void draw() = 0; // pure virtual
+};
+
+class Circle : public Shape {
+public:
+    void draw() override { cout << "Vẽ hình tròn"; }
+};
+```
+
+---
+
+## Hàm bạn (Friend Function)
+Hàm không thuộc lớp nhưng được phép truy cập thành viên private/protected của lớp đó.
+
+```cpp
+class Box {
+private:
+    int width;
+public:
+    Box(int w) : width(w) {}
+    friend void printWidth(Box b);
+};
+
+void printWidth(Box b) {
+    cout << b.width;
+}
+```
+
+---
+
+## Lớp bạn (Friend Class)
+Cho phép một lớp khác truy cập vào thành viên private của lớp hiện tại.
+
+```cpp
+class Engine {
+private:
+    int power = 200;
+    friend class Car;
+};
+
+class Car {
+public:
+    void showPower(Engine e) {
+        cout << e.power;
+    }
+};
+```
+
+---
+
+## Bài tập có lời giải
+
+### Bài 1: Class và Object
+```cpp
+#include <iostream>
+using namespace std;
+
+class Student {
+public:
+    string name;
+    float gpa;
+
+    void input() {
+        cout << "Nhap ten: ";
+        getline(cin, name);
+        cout << "Nhap GPA: ";
+        cin >> gpa;
+    }
+
+    void display() {
+        cout << "Ten: " << name << ", GPA: " << gpa << endl;
+    }
+};
+
+int main() {
+    Student s;
+    s.input();
+    s.display();
+}
+```
+
+### Bài 2: Kế thừa
+```cpp
+#include <iostream>
+using namespace std;
+
+class Person {
+public:
+    string name;
+    int age;
+};
+
+class Employee : public Person {
+public:
+    string position;
+    void show() {
+        cout << name << " - " << age << " tuoi - " << position << endl;
+    }
+};
+
+int main() {
+    Employee e;
+    e.name = "Sơn";
+    e.age = 25;
+    e.position = "Dev";
+    e.show();
+}
+```
+
+### Bài 3: Đa hình
+```cpp
+#include <iostream>
+using namespace std;
+
+class Animal {
+public:
+    virtual void sound() { cout << "Some sound\n"; }
+};
+
+class Dog : public Animal {
+public:
+    void sound() override { cout << "Woof!\n"; }
+};
+
+class Cat : public Animal {
+public:
+    void sound() override { cout << "Meow!\n"; }
+};
+
+int main() {
+    Animal* a;
+    Dog d; Cat c;
+
+    a = &d; a->sound();
+    a = &c; a->sound();
+}
+```
+
+### Bài 4: Friend Function
+```cpp
+#include <iostream>
+using namespace std;
+
+class Number {
+private:
+    int a, b;
+public:
+    Number(int x, int y) : a(x), b(y) {}
+    friend int sum(Number n);
+};
+
+int sum(Number n) {
+    return n.a + n.b;
+}
+
+int main() {
+    Number n(3, 4);
+    cout << "Tong = " << sum(n);
+}
+```
+
+### Bài 5: Trừu tượng
+```cpp
+#include <iostream>
+using namespace std;
+
+class Shape {
+public:
+    virtual void draw() = 0;
+};
+
+class Rectangle : public Shape {
+public:
+    void draw() override { cout << "Vẽ hình chữ nhật\n"; }
+};
+
+class Circle : public Shape {
+public:
+    void draw() override { cout << "Vẽ hình tròn\n"; }
+};
+
+int main() {
+    Shape* s1 = new Rectangle();
+    Shape* s2 = new Circle();
+    s1->draw();
+    s2->draw();
+}
+```
+
+---
+
+## Tổng kết
+OOP giúp mã nguồn dễ bảo trì, mở rộng và tái sử dụng.  
+Bốn tính chất cơ bản:
+1. **Đóng gói (Encapsulation)**  
+2. **Kế thừa (Inheritance)**  
+3. **Đa hình (Polymorphism)**  
+4. **Trừu tượng (Abstraction)**
+
